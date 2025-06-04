@@ -10,7 +10,6 @@ from domain.user.UserName import UserName
 from repository.user.UserEntity import UserEntity
 
 __engine = create_engine("postgresql+psycopg2://admin:admin@localhost:5432/haeger_db", echo=False)
-Base.metadata.create_all(__engine)
 
 
 def get_all_users() -> list[User]:
