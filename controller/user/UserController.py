@@ -20,14 +20,14 @@ def get_all() -> list[UserResponse]:
 def get_by_id(user_id: str) -> UserResponse:
     result: Optional[User] = user_service.get_one(user_id)
     if result is None:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=404, detail="User not found")
     else:
         return response_of_one(result)
 
 
 @router.post("")
 def create_user(neu_user: UserRequest) -> UserResponse:
-    result: User = user_service.add_user(neu_user.user_name)
+    result: User = user_service.add_user(neu_user.user_first_name, neu_user.user_last_name)
     return response_of_one(result)
 
 
@@ -38,7 +38,7 @@ def delete_by_id(user_id: str) -> None:
 
 def response_of_one(user: User) -> UserResponse:
     user_id = str(user.user_id.value)
-    user_name = user.username.value
+    user_name = user.username.first_name + " " + user.username.last_name
     return UserResponse(user_id=user_id, user_name=user_name)
 
 

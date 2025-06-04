@@ -50,18 +50,19 @@ def map_one_to_domain(entity: Optional[UserEntity]) -> Optional[User]:
     if entity is None:
         return None
     user_id = UserId(uuid.UUID(entity.id))
-    user_name = UserName(entity.name)
+    user_name = UserName(entity.first_name, entity.last_name)
     return User(user_id, user_name)
 
 
-def map_list_to_domain(entity_list) -> list[User]:
+def map_list_to_domain(entities) -> list[User]:
     result: list[User] = []
-    for entity in entity_list:
+    for entity in entities:
         result.append(map_one_to_domain(entity))
     return result
 
 
 def map_to_entity(domain: User) -> UserEntity:
     user_id = str(domain.user_id.value)
-    user_name = domain.username.value
-    return UserEntity(id=user_id, name=user_name)
+    user_first_name = domain.username.first_name
+    user_last_name = domain.username.last_name
+    return UserEntity(id=user_id, first_name=user_first_name, last_name=user_last_name)

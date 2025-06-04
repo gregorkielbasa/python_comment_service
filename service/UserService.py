@@ -14,8 +14,8 @@ def get_one(user_id: str) -> Optional[User]:
     return repository.get_user(UserId(user_id))
 
 
-def add_user(user_name: str) -> User:
-    user = User.new(UserName(user_name))
+def add_user(user_first_name: str, user_last_name: str) -> User:
+    user = User.new(UserName(user_first_name, user_last_name))
     repository.create_user(user)
     return repository.get_user(user.user_id)
 

@@ -9,7 +9,8 @@ Base = declarative_base()
 class UserEntity(Base):
     __tablename__ = "users"
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    name: Mapped[str] = mapped_column(String(25))
+    first_name: Mapped[str] = mapped_column(String(25))
+    last_name: Mapped[str] = mapped_column(String(25))
 
     def __repr__(self):
-        return "UserEntity(id={}, name={})".format(self.id, self.name)
+        return "UserEntity(id={}, first_name={} last_name={})".format(self.id, self.firs_tname, self.last_tname)
