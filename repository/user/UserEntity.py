@@ -11,6 +11,8 @@ class UserEntity(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     first_name: Mapped[str] = mapped_column(String(25))
     last_name: Mapped[str] = mapped_column(String(25))
+    email: Mapped[str] = mapped_column(String(60))
 
     def __repr__(self):
-        return "UserEntity(id={}, first_name={} last_name={})".format(self.id, self.firs_tname, self.last_tname)
+        return ("UserEntity(id={}, first_name={} last_name={} email={})"
+                .format(self.id, self.first_name, self.last_name, self.email))

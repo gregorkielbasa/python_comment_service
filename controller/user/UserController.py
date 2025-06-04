@@ -39,7 +39,8 @@ def delete_by_id(user_id: str) -> None:
 def response_of_one(user: User) -> UserResponse:
     user_id = str(user.user_id.value)
     user_name = user.username.first_name + " " + user.username.last_name
-    return UserResponse(user_id=user_id, user_name=user_name)
+    user_email = user.email.value
+    return UserResponse(user_id=user_id, user_name=user_name, user_email=user_email)
 
 
 def response_of_list(users: list[User]) -> list[UserResponse]:
