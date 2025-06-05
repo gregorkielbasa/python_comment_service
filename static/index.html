@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>Users and Comments</title>
+</head>
+<body>
+
+<section id="comments-section">
+<h1>Comments</h1>
+<ul id="comments-list"></ul>
+
+<h2>Add Comment</h2>
+<div id="add-comment-form">
+    <select id="comment-author"></select>
+    <input type="text" id="comment-text" placeholder="Write your comment here..."/>
+    <button id="add-comment-button">Add</button>
+</div>
+</section>
+
+
+<section id="user-section">
+<h1>Users</h1>
+<ul id="users-list"></ul>
+
+<h2>Add User</h2>
+<div id="add-user-form">
+    <input type="text" id="firstName" placeholder="Write your first Name..."/>
+    <input type="text" id="lastName" placeholder="Write your last Name..."/>
+    <button id="add-user-button">Add</button>
+</div>
+</section>
+
+<script>
+    let users = [];
+    let comments = []
+
+    async function getAllUsers() {
+        const res = await fetch('/users');
+        return res.json();
+    }
+
+    async function getAllComments() {
+        const res = await fetch('/comments');
+        return res.json();
+    }
+
+    async function deleteUser(userId) {
+        const res = await fetch(`/users/${userId}`, {method: 'DELETE'});
+        if (!res.ok) {
+            throw new Error(`Failed to delete user ${userId}`);
+        }
+    }
+
+    async function deleteComment(commentId) {
+        const res = await fetch(`/comments/${commentId}`, {method: 'DELETE'});
+        if (!res.ok) {
+            throw new Error(`Failed to delete comment ${commentId}`);
+        }
+    }
+
+    async function createUser(firstName, lastName) {
+        const res = await fetch('/users', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({user_first_name: firstName, user_last_name: lastName})
+        });
+        if (!res.ok) {
+            throw new Error('Failed to create user');
+        }
+        return res.json(); // assuming server returns the created user
+    }
+
+    async function createComment(userId, text) {
+        const res = await fetch('/comments', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({author_id: userId, text})
+        });
+        if (!res.ok) {
+            throw new Error('Failed to create comment');
+        }
+        return res.json(); // assuming server returns the created comment
+    }
+
+    async function loadData() {
+        users = await getAllUsers();
+        comments = await getAllComments();
+        displayUsers();
+        displayComments();
+    }
+
+    function displayComments() {
+        const commentsList = document.getElementById('comments-list');
+        commentsList.innerHTML = ''; // clear existing content
+
+        comments.forEach(comment => {
+            const li = document.createElement('li');
+
+            // Find user name from author_id
+            const author = users.find(u => u.user_id === comment.author_id);
+            const authorName = author ? `${author.user_name}` : 'Unknown';
+
+            // Comment text
+            li.textContent = `"${comment.text}" — ${authorName} `;
+
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.style.marginLeft = '10px';
+            deleteBtn.onclick = async () => {
+                await deleteComment(comment.comment_id)
+                await loadData()
+            };
+
+            li.appendChild(deleteBtn);
+            commentsList.appendChild(li);
+        });
+    }
+
+    function displayUsers() {
+        const usersList = document.getElementById('users-list');
+        usersList.innerHTML = '';
+
+        const authorSelect = document.getElementById('comment-author');
+        authorSelect.innerHTML = ''; // clear previous options
+
+        users.forEach(user => {
+            // update user list display
+            const li = document.createElement('li');
+
+            // User on the list
+            li.textContent = `${user.user_name} - ${user.user_email}`;
+
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.style.marginLeft = '10px';
+            deleteBtn.onclick = async () => {
+                await deleteUser(user.user_id)
+                await loadData()
+            };
+
+            li.append(deleteBtn)
+            usersList.appendChild(li);
+
+            // populate dropdown
+            const option = document.createElement('option');
+            option.value = user.user_id;
+            option.textContent = `${user.user_name}`;
+            authorSelect.appendChild(option);
+        });
+    }
+
+    document.getElementById('add-comment-button').onclick = async () => {
+        const authorId = document.getElementById('comment-author').value;
+        const commentText = document.getElementById('comment-text').value.trim();
+
+        if (!authorId || !commentText) {
+            alert("Please select an author and enter a comment.");
+            return;
+        }
+
+        try {
+            await createComment(authorId, commentText);
+            document.getElementById('comment-text').value = ''; // clear input
+            await loadData(); // refresh list
+        } catch (err) {
+            console.error("Failed to create comment:", err);
+            alert("Something went wrong while creating the comment.");
+        }
+    };
+
+    document.getElementById('add-user-button').onclick = async () => {
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+
+        if (!firstName || !lastName) {
+            alert("Please enter your first and last name.");
+            return;
+        }
+
+        try {
+            await createUser(firstName, lastName);
+            document.getElementById('firstName').value = ''; // clear input
+            document.getElementById('lastName').value = ''; // clear input
+            await loadData(); // refresh list
+        } catch (err) {
+            console.error("Failed to create user:", err);
+            alert("Something went wrong while creating the user.");
+        }
+    };
+
+    loadData();
+</script>
+</body>
+</html>
